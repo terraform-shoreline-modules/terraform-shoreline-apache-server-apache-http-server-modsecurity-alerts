@@ -1,0 +1,134 @@
+{
+  "name": "apache_http_server_modsecurity_alerts_incident",
+  "description": "An Apache HTTP Server ModSecurity Alerts incident refers to a situation where the ModSecurity module of the Apache web server detects unusual or potentially malicious activity. This module is designed to provide an additional layer of security to the web server by analyzing incoming traffic and blocking any requests that match predefined security rules. When an incident of this type occurs, it indicates that ModSecurity has detected activity that could potentially compromise the security of the web server and its applications. This type of incident requires immediate investigation and remediation to prevent any further damage to the system.",
+  "params": [
+    {
+      "name": "APACHE_PACKAGE_NAME",
+      "value": ""
+    },
+    {
+      "name": "PATH_TO_AUDIT_LOG",
+      "value": ""
+    },
+    {
+      "name": "MODSECURITY_PACKAGE_NAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Apache HTTP Server ModSecurity Alerts Incident\nAn Apache HTTP Server ModSecurity Alerts incident refers to a situation where the ModSecurity module of the Apache web server detects unusual or potentially malicious activity. This module is designed to provide an additional layer of security to the web server by analyzing incoming traffic and blocking any requests that match predefined security rules. When an incident of this type occurs, it indicates that ModSecurity has detected activity that could potentially compromise the security of the web server and its applications. This type of incident requires immediate investigation and remediation to prevent any further damage to the system."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Apache HTTP Server is running"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status apache2.service`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Apache error log for any ModSecurity related errors"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `tail -f /var/log/apache2/error.log | grep ModSecurity`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if ModSecurity module is loaded in Apache"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `apachectl -M | grep security`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check ModSecurity configuration file for any syntax errors"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `apachectl configtest`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check ModSecurity rule set for any errors"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `modsec-srs -T`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check ModSecurity rule set for any false positives"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `modsec-srs -F ${PATH_TO_AUDIT_LOG}`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check ModSecurity rule set for any false negatives"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `modsec-srs -N ${PATH_TO_AUDIT_LOG}`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Ensure that the Apache HTTP Server and ModSecurity are up-to-date with the latest patches and versions to address any known vulnerabilities."
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_apache_upgrade($APACHE_PACKAGE_NAME, $MODSECURITY_PACKAGE_NAME)"
+    }
+  ]
+}
